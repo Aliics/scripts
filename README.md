@@ -13,6 +13,5 @@ run on.
 # current scripts
 
 script | description
-- | -
+-- | --
 touch-bash | generates an empty executable bash file
-
