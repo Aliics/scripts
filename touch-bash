@@ -1,30 +1,30 @@
 #!/usr/bin/env bash
 
-SILENT=false
+VERBOSE=false
 FILE=$1
 
-while getopts 's' OPT; do
+while getopts 'v' OPT; do
     case $OPT in
-        s) 
-            SILENT=true
+        v) 
+            VERBOSE=true
             FILE=$2;;
     esac
 done
 
-function silent_echo {
-    if [ $SILENT = false ]; then
+function verbose_echo {
+    if [ $VERBOSE = true ]; then
         echo $@
     fi
 }
 
 if [ -f $FILE ]; then
-    echo "$FILE already exists or is not a valid file name"
+    verbose_echo "$FILE already exists or is not a valid file name"
     exit 0
 fi
-silent_echo "Creating $FILE"
+verbose_echo "Creating $FILE"
 touch $FILE || exit 1
-silent_echo 'Adding shebang line'
+verbose_echo 'Adding shebang line'
 echo '#!/usr/bin/env bash' > $FILE || exit 1
-silent_echo 'Making file executable'
+verbose_echo 'Making file executable'
 chmod +x $FILE || exit 1
 
