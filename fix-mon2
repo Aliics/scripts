@@ -1,1 +1,18 @@
 #!/usr/bin/env bash
+
+SCALE='1'
+
+while getopts 'm:s:' OPT; do
+    case $OPT in
+        m) MONITOR=$OPTARG;;
+        s) SCALE=$OPTARG;;
+    esac
+done
+
+if [ -z $MONITOR ]; then
+    echo 'No monitor defined'
+    exit 1
+fi
+
+xrandr --output $MONITOR --scale "${SCALE}x${SCALE}"
+
