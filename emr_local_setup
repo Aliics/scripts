@@ -5,10 +5,21 @@ if [ -z $1 ]; then
     exit 1
 fi
 
-JAR_VERSION=$1
-ENV_DIR="${JAR_VERSION}-env"
+if [ -z $2 ]; then
+    echo "No yl-win partition specified"
+    exit 1
+fi
 
-pushd ${HOME}/local-spark-testing > /dev/null
+if [ -z $3 ]; then
+    echo "No hba-raw-data partition specified"
+fi
+
+JAR_VERSION=$1
+YL_PARTITION=$2
+HBA_PARTITION=$3
+ENV_DIR="env-${JAR_VERSION}"
+
+pushd "${HOME}/local-spark-testing" > /dev/null
 
 function create_or_clear {
     if [ -d $1 ]; then
@@ -19,20 +30,38 @@ function create_or_clear {
 }
 
 create_or_clear ${ENV_DIR}
-create_or_clear "${ENV_DIR}/hba-files"
 create_or_clear "${ENV_DIR}/yl-files"
+create_or_clear "${ENV_DIR}/hba-files"
 create_or_clear "${ENV_DIR}/output"
+touch "${ENV_DIR}/yl_files.csv"
+touch "${ENV_DIR}/hba_files.csv"
 
+BUCKET="s3://ssp-datalake"
 JAR_PATH="${ENV_DIR}/yl-win-job-${JAR_VERSION}.jar"
-S3_JAR_PATH="s3://ssp-datalake/emr-jars/yl-win-job/yl-win-job-${JAR_VERSION}.jar"
+S3_JAR_PATH="${BUCKET}/emr-jars/yl-win-job/yl-win-job-${JAR_VERSION}.jar"
+RAW_PATH="${BUCKET}/raw"
+YL_PATH="${RAW_PATH}/yl-win/firehose/win/${YL_PARTITION}"
+HBA_PATH="${RAW_PATH}/hba_raw_data/${HBA_PARTITION}"
 
-echo "Copying jar from ${S3_JAR_PATH} into ${JAR_PATH}"
+echo "Copying jar from ${S3_JAR_PATH} -> ${JAR_PATH}"
 aws s3 cp ${S3_JAR_PATH} ${JAR_PATH}
 
-SPARK_RUN="spark-submit --deploy-mode client \
-    --conf spark.sql.files.ignoreCorruptFiles=true \
-    --class org.adscale.YlWinJob ${JAR_PATH} \
-    --executor-memory 1G \
+echo "Populating yl-files with raw files in ${YL_PATH}"
+aws s3 sync ${YL_PATH} "${ENV_DIR}/yl-files"
+
+echo "Populating hba-files with raw files in ${HBA_PATH}"
+aws s3 sync ${HBA_PATH} "${ENV_DIR}/hba-files"
+mv "${ENV_DIR}/hba-files/kc_datacentre\=*/*" "${ENV_DIR}/hba-files/"
+rm -rf "${ENV_DIR}/hba-files/kc_datacentre\=*/"
+
+echo "Setting up csv files"
+find . -wholename "${ENV_DIR}/hba-files/*.json.gz" > "${ENV_DIR}/hba_files.csv"
+find . -wholename "${ENV_DIR}/yl-files/*.parquet" > "${ENV_DIR}/yl_files.csv"
+
+SPARK_RUN="spark-submit --deploy-mode client 
+    --conf spark.sql.files.ignoreCorruptFiles=true 
+    --class org.adscale.YlWinJob ${JAR_PATH} 
+    --executor-memory 1G 
     ${JAR_PATH} -y ${ENV_DIR}/yl_files.csv -d ${ENV_DIR}/hba_files -o ${ENV_DIR}/output"
 
 echo "Executing spark-submit: ${SPARK_RUN}"
