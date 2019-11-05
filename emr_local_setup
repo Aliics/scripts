@@ -1,0 +1,42 @@
+#! /usr/bin/env bash
+
+if [ -z $1 ]; then
+    echo "No jar version specified"
+    exit 1
+fi
+
+JAR_VERSION=$1
+ENV_DIR="${JAR_VERSION}-env"
+
+pushd ${HOME}/local-spark-testing > /dev/null
+
+function create_or_clear {
+    if [ -d $1 ]; then
+        rm -rf $1/*
+    else
+        mkdir $1
+    fi
+}
+
+create_or_clear ${ENV_DIR}
+create_or_clear "${ENV_DIR}/hba-files"
+create_or_clear "${ENV_DIR}/yl-files"
+create_or_clear "${ENV_DIR}/output"
+
+JAR_PATH="${ENV_DIR}/yl-win-job-${JAR_VERSION}.jar"
+S3_JAR_PATH="s3://ssp-datalake/emr-jars/yl-win-job/yl-win-job-${JAR_VERSION}.jar"
+
+echo "Copying jar from ${S3_JAR_PATH} into ${JAR_PATH}"
+aws s3 cp ${S3_JAR_PATH} ${JAR_PATH}
+
+SPARK_RUN="spark-submit --deploy-mode client \
+    --conf spark.sql.files.ignoreCorruptFiles=true \
+    --class org.adscale.YlWinJob ${JAR_PATH} \
+    --executor-memory 1G \
+    ${JAR_PATH} -y ${ENV_DIR}/yl_files.csv -d ${ENV_DIR}/hba_files -o ${ENV_DIR}/output"
+
+echo "Executing spark-submit: ${SPARK_RUN}"
+eval $SPARK_RUN
+
+popd > /dev/null
+
