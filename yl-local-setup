@@ -1,5 +1,13 @@
 #! /usr/bin/env bash
 
+function create_or_clear {
+    if [ -d $1 ]; then
+        rm -rf $1/*
+    else
+        mkdir $1
+    fi
+}
+
 while getopts 'v:y:d:' OPT; do
     case $OPT in
         v) JAR_VERSION=$OPTARG;;
@@ -17,14 +25,6 @@ fi
 ENV_DIR="env-${JAR_VERSION}"
 
 pushd "${HOME}/local-spark-testing" > /dev/null
-
-function create_or_clear {
-    if [ -d $1 ]; then
-        rm -rf $1/*
-    else
-        mkdir $1
-    fi
-}
 
 create_or_clear ${ENV_DIR}
 create_or_clear "${ENV_DIR}/yl-files"
