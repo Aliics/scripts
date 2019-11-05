@@ -55,14 +55,14 @@ mv "${ENV_DIR}/hba-files/kc_datacentre\=*/*" "${ENV_DIR}/hba-files/"
 rm -rf "${ENV_DIR}/hba-files/kc_datacentre\=*/"
 
 echo "Setting up csv files"
-find . -wholename "${ENV_DIR}/hba-files/*.json.gz" > "${ENV_DIR}/hba_files.csv"
-find . -wholename "${ENV_DIR}/yl-files/*.parquet" > "${ENV_DIR}/yl_files.csv"
+find . -wholename "./${ENV_DIR}/hba-files/*.json.gz" > "${ENV_DIR}/hba_files.csv"
+find . -wholename "./${ENV_DIR}/yl-files/*.parquet" > "${ENV_DIR}/yl_files.csv"
 
 SPARK_RUN="spark-submit --deploy-mode client 
     --conf spark.sql.files.ignoreCorruptFiles=true 
-    --class org.adscale.YlWinJob ${JAR_PATH} 
+    --class org.adscale.YLWinJob 
     --executor-memory 1G 
-    ${JAR_PATH} -y ${ENV_DIR}/yl_files.csv -d ${ENV_DIR}/hba_files -o ${ENV_DIR}/output"
+    ${JAR_PATH} -y ${ENV_DIR}/yl_files.csv -d ${ENV_DIR}/hba_files.csv -o ${ENV_DIR}/output"
 
 echo "Executing spark-submit: ${SPARK_RUN}"
 eval $SPARK_RUN
