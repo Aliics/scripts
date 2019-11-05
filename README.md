@@ -15,3 +15,4 @@ run on.
 script | description
 -- | --
 touch-bash | generates an empty executable bash file
+yl-local-setup | sets up a simple environment for a local emr job using yl-win and hba_raw_data
