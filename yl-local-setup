@@ -1,22 +1,19 @@
 #! /usr/bin/env bash
 
-if [ -z $1 ]; then
-    echo "No jar version specified"
+while getopts 'v:y:d:' OPT; do
+    case $OPT in
+        v) JAR_VERSION=$OPTARG;;
+        y) YL_PARTITION=$OPTARG;;
+        d) HBA_PARTITION=$OPTARG;;
+        \?) exit 1;;
+    esac
+done
+
+if [ -z "${JAR_VERSION}" ] || [ -z "${YL_PARTITION}" ] || [ -z "${HBA_PARTITION}" ]; then
+    echo "Missing at least one of required options [v, y, d]"
     exit 1
 fi
 
-if [ -z $2 ]; then
-    echo "No yl-win partition specified"
-    exit 1
-fi
-
-if [ -z $3 ]; then
-    echo "No hba-raw-data partition specified"
-fi
-
-JAR_VERSION=$1
-YL_PARTITION=$2
-HBA_PARTITION=$3
 ENV_DIR="env-${JAR_VERSION}"
 
 pushd "${HOME}/local-spark-testing" > /dev/null
@@ -44,13 +41,13 @@ YL_PATH="${RAW_PATH}/yl-win/firehose/win/${YL_PARTITION}"
 HBA_PATH="${RAW_PATH}/hba_raw_data/${HBA_PARTITION}"
 
 echo "Copying jar from ${S3_JAR_PATH} -> ${JAR_PATH}"
-aws s3 cp ${S3_JAR_PATH} ${JAR_PATH}
+aws s3 cp ${S3_JAR_PATH} ${JAR_PATH} || exit 2
 
 echo "Populating yl-files with raw files in ${YL_PATH}"
-aws s3 sync ${YL_PATH} "${ENV_DIR}/yl-files"
+aws s3 sync ${YL_PATH} "${ENV_DIR}/yl-files" || exit 2
 
 echo "Populating hba-files with raw files in ${HBA_PATH}"
-aws s3 sync ${HBA_PATH} "${ENV_DIR}/hba-files"
+aws s3 sync ${HBA_PATH} "${ENV_DIR}/hba-files" || exit 2
 mv "${ENV_DIR}/hba-files/kc_datacentre\=*/*" "${ENV_DIR}/hba-files/"
 rm -rf "${ENV_DIR}/hba-files/kc_datacentre\=*/"
 
@@ -65,7 +62,7 @@ SPARK_RUN="spark-submit --deploy-mode client
     ${JAR_PATH} -y ${ENV_DIR}/yl_files.csv -d ${ENV_DIR}/hba_files.csv -o ${ENV_DIR}/output"
 
 echo "Executing spark-submit: ${SPARK_RUN}"
-eval $SPARK_RUN
+eval $SPARK_RUN || exit 3
 
 popd > /dev/null
 
