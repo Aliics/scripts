@@ -17,6 +17,7 @@ xrandr_command="xrandr"
 for d in ${displays[@]}
 do
     mode="1920x1080"
+    dpi="96"
     position=""
     primary=""
 
@@ -28,6 +29,7 @@ do
     in
     "DP-1-1")
         mode="2560x1440"
+        dpi="102"
         position="--right-of $d"
         primary="--primary ";;
     "HDMI-1-1")
@@ -36,7 +38,8 @@ do
     esac
 
     # Concat this all together to build the xrandr command.
-    xrandr_command="$xrandr_command$position --output $d $primary--mode $mode "
+    xrandr_command="$xrandr_command$position --output $d $primary--mode $mode
+    --dpi $dpi "
 done
 
 $($xrandr_command)
