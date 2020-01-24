@@ -9,3 +9,4 @@ version control-y.
 script | description
 -- | --
 display_config.sh | Configures my displays for all setups that I have.
+cp_branch.sh | Copies currently checked out branch to clipboard.
