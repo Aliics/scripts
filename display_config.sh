@@ -11,8 +11,7 @@ xrandr_cli="xrandr --output eDP-1-1 --mode 1920x1080"
 # other display.
 # HDMI-0 = home
 # DP-1-1 = work
-case ${displays[@]}
-in
+case ${displays[@]} in
     *"HDMI-0"*)
         xrandr_cli="$xrandr_cli --left-of HDMI-0 --output HDMI-0 --auto";;
     *"DP-1-1"*)
