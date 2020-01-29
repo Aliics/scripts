@@ -11,4 +11,6 @@ script | description
 [display_config.sh](display_config.sh) | Configures my displays for all setups that I have.
 [cp_branch.sh](cp_branch.sh) | Copies currently checked out branch to clipboard.
 [touch_bash.sh](touch_bash.sh) | Wraps touch to create bash scripts.
+[discover.sh](discover.sh) | Finds a random executable binary in /usr/bin to learn about.
+
 
