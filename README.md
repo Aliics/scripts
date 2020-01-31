@@ -1,8 +1,22 @@
 # scripts
 
-This is just a small repository to house my convenience scripts.
-I would normally just put all of these in a gist, but it's not as
-version control-y.
+Small scripts for my own convenience; sometimes automated stuff is just so
+much easier to live with.
+
+# setup
+
+Clone this repository locally.
+> git clone https://github.com/Aliics/scripts.git
+
+Change directory to **$HOME**
+> cd $HOME
+
+Create a symbolic link to this directory
+> ln -s WHERE_REPO_IS_LOCATED ./scripts
+
+After having the directory with all the scripts cloned into a convenient place
+under home, it could be useful to have these scripts aliased in your 
+**.bashrc**.
 
 # current scripts
 
