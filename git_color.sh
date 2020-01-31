@@ -4,7 +4,7 @@
 # not a git repository.
 if [[ ! -d .git ]]
 then
-    return
+    exit 1;
 fi
 
 # We are in a git repo and now we need the status of the branch.
