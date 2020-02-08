@@ -13,7 +13,7 @@ xrandr_cli="xrandr --output eDP-1-1 --mode 1920x1080"
 # DP-1-1 = work
 case ${displays[@]} in
     *"HDMI-0"*)
-        xrandr_cli="$xrandr_cli --left-of HDMI-0 --output HDMI-0 --auto";;
+        xrandr_cli="$xrandr_cli --left-of HDMI-0 --output HDMI-0 --mode 1920x1080 --rate 144";;
     *"DP-1-1"*)
         xrandr_cli="$xrandr_cli --right-of DP-1-1 --output DP-1-1 --auto";;
 esac
